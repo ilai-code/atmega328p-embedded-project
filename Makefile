@@ -9,6 +9,7 @@
 # Using screen to listen to UART 
 # Kill a screen task by sudo screen -X -S [PID] quit
 # ctrl + a -> d to detach the screen
+# sudo cat work the same way as screen so it might be better to just stick with the cat option
 # sudo screen -S [name i.e uart_monitor] sh -c "cat /dev/ttyUSB0"
 # set up the serial port
 # sudo stty -F /dev/ttyUSB0 [baud rate] [extra flags if necessary]
@@ -24,7 +25,7 @@ CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude
 PORT = /dev/ttyUSB0
 BAUD = 115200
 
-OBJ = src/main.o src/drivers/delay.o
+OBJ = src/main.o src/drivers/delay.o src/drivers/uart.o
 
 all: main.hex
 
@@ -41,11 +42,9 @@ flash:
 	sudo avrdude -c $(PROGRAMMER) -p m328p -P $(PORT) -b $(BAUD) -D -U flash:w:main.hex:i
 	make clean
 
-configure_uart:
-	sudo stty -F /dev/ttyUSB0 9600
-
 uart:
-	cmd.exe /C wt --title "UART_MONITOR" wsl -e bash -c "sudo screen -S uart_monitor sh -c 'sudo cat /dev/ttyUSB0'"
+	cmd.exe /C wt --title "UART_MONITOR" wsl -e bash -c "sudo stty -F /dev/ttyUSB0 9600 && sudo cat /dev/ttyUSB0"
+
 uart_kill:
 	sudo screen -S uart_monitor -X quit
 

@@ -1,5 +1,6 @@
 #include "drivers/delay.h"
 #include "drivers/uart.h"
+#include <avr/power.h>
 
 // #undef DDRB
 // #define DDRB *((volatile unsigned char*)0x24)   // Data Direction Register for port B. Refer to data sheet for the address
@@ -30,8 +31,8 @@ void double_led_pwm(int pinD){
 }
 
 void led_array(){
-    // led array pin layout from left to right PB4 | PB3 | PB2 | PB1 | PB0 | PD7 | PD6 | PD5 | PD4 | PD3 |
-    //                                          10 |  9  |  8  |  7  |  6  |  5  |  4  |  3  |  2  |  1  |
+    // led array pin layout from left to right PB5  | PB4  | PB3  | PB2  | PB1 | PB0 | PD7 | PD6 | PD5 | PD4 | PD3 |
+    //                                          13  |  12  |  11  |  10  |  9  |  8  |  5  |  4  |  3  |  2  |  1  |
     // set pins 0-4
     DDRB |= 0x1F;
     // set pins 3-7
@@ -59,19 +60,31 @@ void led_array(){
 
 
 int main(void){
-    // USART_init(MYUBRR);
+    // maybe needed to set to 16mhz
+    // clock_prescale_set(clock_div_1);
+
+    // enable the timer
     timer1_init();
 
-    // initialize port 5 of data direction register as output
-    DDRB |= (0x1 << DDB5);
+    // enable uart protocol to receive and transmit data
+    UART_init(MYUBRR);
+    
+
+    // initialize port of data direction register as output
+    // set port 9 to be output (the relay) and port 12 to be input (the button)
+    DDRB = 0b00000010;
+    int relayState = 0x0;
+
 
     while(1){
-        // Port13_Blink(DDB5);
-        // delay_ms(200);
-        // double_led_pwm(4);
-        // led_array();
-        // unsigned long start = system_ticks;
-        // unsigned long elapsed = end - start;
-        // USART_Transmit_ulong(elapsed);
+        // following code is for a dc motor
+        // when the button is pressed it will trigger the relay and allow the led light and dc motor to spin
+        int currentButtonState = (int)(PINB & (1 << PINB4));
+
+        if (currentButtonState == 0x0){
+            PORTB = ~(relayState << PORTB1);
+        } else {
+            PORTB = (relayState << PORTB1);
+        }
     }
 }

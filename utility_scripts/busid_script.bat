@@ -1,4 +1,6 @@
 @echo off
+echo listing devices
+usbipd list
 echo Attempting to find the connected microcontroller
 FOR /F "tokens=2" %%A IN ('usbipd list ^| findstr "1a86:7523"') do (SET VID_PID=%%A) 
 IF DEFINED BUSID set "BUSID = %BUSID:"=%"

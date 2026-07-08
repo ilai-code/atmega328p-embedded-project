@@ -12,4 +12,6 @@ ISR(TIMER1_COMPA_vect);
 
 void delay_ms(unsigned long ms); // Take in time in milliseconds
 
+unsigned long getTime(); // returns the current system tick;
+
 #endif

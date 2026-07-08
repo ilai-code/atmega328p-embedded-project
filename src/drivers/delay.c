@@ -1,6 +1,4 @@
 #include "delay.h"
-#include "util/atomic.h"
-#include <stdlib.h>
 
 
 // examples of how to define the physical locations of registers or other values
@@ -60,7 +58,7 @@ ISR(TIMER1_COMPA_vect){
 // atomic function to read the system_tick properly
 void delay_ms(unsigned long ms){
     unsigned long start;
-    
+
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
         start = system_ticks;
     }
@@ -79,4 +77,13 @@ void delay_ms(unsigned long ms){
         }
 
     }
+}
+
+unsigned long getTime(){
+    unsigned long time;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
+        time = system_ticks;
+    }
+
+    return time;
 }
