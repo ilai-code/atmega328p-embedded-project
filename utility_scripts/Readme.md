@@ -4,4 +4,4 @@ The utility scripts here are to help you connect a microcontroller to your WSL e
 
 The busid_script.bat is a windows script that utilizes usbipd to find and connect to the microcontroller. Use `usbipd list` to find the microcontroller and identify the VID:PID.
 
-Always run the bat script first before running the linux script to attach the microcontroller. You may have to run the bat script as admin or give the machine some time to detect the device before running. 
+Always run the bat script first before running the linux script to attach the microcontroller. Note that you would need to run the script as admin and if it gives errors then give the machine some time to detect the device before running. 

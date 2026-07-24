@@ -20,12 +20,16 @@ PROGRAMMER = arduino
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude
+CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude -Iinclude/freeRTOS_library/include -Iinclude/freeRTOS_library/portable/GCC/ATMega323
+LDFLAGS = -mmcu=$(MCU)
 
 PORT = /dev/ttyUSB0
 BAUD = 115200
 
-OBJ = src/main.o src/drivers/delay.o src/drivers/uart.o
+SRCS = src/main.c include/freeRTOS_library/portable/MemMang/heap_1.c
+SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c 
+SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
+OBJ = $(SRCS:.c=.o) 
 
 all: main.hex
 
@@ -33,7 +37,7 @@ all: main.hex
 	$(CC) $(CFLAGS) -c $< -o $@
 
 main.out: $(OBJ)
-	$(CC) $(CFLAGS) -o main.out $(OBJ)
+	$(CC) $(LDFLAGS) -o main.out $(OBJ)
 
 main.hex: main.out
 	$(OBJCOPY) -O ihex -j .text -j .data main.out main.hex
@@ -49,4 +53,4 @@ uart_kill:
 	sudo screen -S uart_monitor -X quit
 
 clean:
-	rm -rf *.out *.hex *.o src/*.o src/drivers/*.o
+	rm -rf *.out *.hex *.o src/*.o src/drivers/*.o include/freeRTOS_library/*.o include/freeRTOS_library/portable/GCC/ATMega323/*.o include/freeRTOS_library/portable/MemMang/*.o

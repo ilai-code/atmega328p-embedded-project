@@ -1,19 +1,43 @@
-#include "drivers/delay.h"
-#include "drivers/uart.h"
 #include <avr/power.h>
+#include <FreeRTOS.h>
+#include <freeRTOS_library/include/task.h>
 
 // #undef DDRB
 // #define DDRB *((volatile unsigned char*)0x24)   // Data Direction Register for port B. Refer to data sheet for the address
 // #undef PORTB
 // #define PORTB *((volatile unsigned char*)0x25)  // Output register for port B. Refer to data sheet for the address
 
+// set port 9 to be output (the relay) and port 12 to be input (the button)
+#define motor_setup 0b00000010
+
 void Port13_Blink(int pinB){
     // flash the led using delay function
     PORTB |= (0x1 << pinB);
-    delay_ms(500);
+    // delay_ms(500);
 
     PORTB &= ~(0x1 << pinB);
-    delay_ms(500);
+    // delay_ms(500);
+
+    return;
+}
+
+void BlinkLedPin13Task(){
+    // Set the data direction of port B bit 5 (pin 13) as output
+    DDRB |= (0x1 << DDB5);
+
+    // Initialize the current tick
+    TickType_t LastTime = xTaskGetTickCount();
+
+    // Set the time in ms to wait
+    const TickType_t BlinkPeriod = pdMS_TO_TICKS(1000);
+
+    // Loop to blink the led
+    for (;;){
+        vTaskDelayUntil(&LastTime, BlinkPeriod);
+        PORTB ^= (1 << PB5);
+
+        // for (volatile uint32_t i = 0; i < 100000; i++);
+    }
 
     return;
 }
@@ -24,10 +48,10 @@ void double_led_pwm(int pinD){
     DDRD |= (0x3 << pinD);
 
     PORTD = (0x1 << pinD);
-    delay_ms(100);
+    // delay_ms(100);
 
     PORTD = (0x2 << pinD);
-    delay_ms(100);
+    // delay_ms(100);
 }
 
 void led_array(){
@@ -43,7 +67,7 @@ void led_array(){
 
     for (;PB >= 0; PB--){
             PORTB = (0x1 << PB);
-            delay_ms(100);
+            // delay_ms(100);
             PORTB = ~(0x1 << PB);
     }
 
@@ -51,40 +75,54 @@ void led_array(){
     
     for (; PD >= 0; PD--){
         PORTD = (0x1 << PD);
-        delay_ms(100);
+        // delay_ms(100);
         PORTD = ~(0x1 << PD);
     }
     
     PORTD = 0;
 }
 
+void motor_circuit_logic(){
+    // following code is for a dc motor
+    // when the button is pressed it will trigger the relay and allow the led light and dc motor to spin
+    int relayState = 0x0;
+    int currentButtonState = (int)(PINB & (1 << PINB4));
+
+    if (currentButtonState == 0x0){
+        PORTB = ~(relayState << PORTB1);
+    } else {
+        PORTB = (relayState << PORTB1);
+    }
+}
+
 
 int main(void){
     // maybe needed to set to 16mhz
-    // clock_prescale_set(clock_div_1);
+    clock_prescale_set(clock_div_1);
+
+    // Setup the register properly for ATMega328p
+    TIMSK1 |= 0x02;
 
     // enable the timer
-    timer1_init();
+    // timer1_init();
 
     // enable uart protocol to receive and transmit data
-    UART_init(MYUBRR);
-    
+    // UART_init(MYUBRR);
 
-    // initialize port of data direction register as output
-    // set port 9 to be output (the relay) and port 12 to be input (the button)
-    DDRB = 0b00000010;
-    int relayState = 0x0;
+    xTaskCreate(BlinkLedPin13Task, "Led_blink", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 
+    vTaskStartScheduler();
+
+    // DDRB = motor_setup;
+
+    // delay_s(5);
+    // DDRB |= (1 << DDB5);
 
     while(1){
-        // following code is for a dc motor
-        // when the button is pressed it will trigger the relay and allow the led light and dc motor to spin
-        int currentButtonState = (int)(PINB & (1 << PINB4));
-
-        if (currentButtonState == 0x0){
-            PORTB = ~(relayState << PORTB1);
-        } else {
-            PORTB = (relayState << PORTB1);
-        }
+        // delay_s(1);
+        // UART_Transmit_string("1 seconds passed\n");
     }
+
+
+    return 0;
 }
