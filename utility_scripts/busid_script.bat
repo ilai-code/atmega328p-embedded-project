@@ -13,10 +13,9 @@ IF "%VID_PID%"=="" (
 echo Found the VID:PID of the controller to be: %VID_PID%
 echo try to unbind if possible first
 usbipd unbind -i "%VID_PID%"
+timeout /t 2 >nul
 echo Binding the BUSID
-usbipd bind -i "%VID_PID%"
+usbipd bind --force -i "%VID_PID%"
 echo Attaching
 usbipd attach --wsl -a -i "%VID_PID%"
 echo done
-echo will now pause
-pause

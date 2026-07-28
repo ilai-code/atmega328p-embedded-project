@@ -52,13 +52,13 @@
 
 // Memory Management
 #define configMINIMAL_STACK_SIZE	( ( unsigned short ) 85 )
-#define configTOTAL_HEAP_SIZE		( (size_t ) ( 1500 ) )
+#define configTOTAL_HEAP_SIZE		( (size_t ) ( 800 ) )
 
 // Kernel Optimization Options
 #define configUSE_PREEMPTION		1
 #define configUSE_IDLE_HOOK			0
 #define configUSE_TICK_HOOK			0
-#define configMAX_PRIORITIES		( 2 )
+#define configMAX_PRIORITIES		( 4 )
 #define configMAX_TASK_NAME_LEN		( 8 )
 #define configUSE_TRACE_FACILITY	0
 #define configUSE_16_BIT_TICKS		1

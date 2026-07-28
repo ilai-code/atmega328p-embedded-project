@@ -20,13 +20,13 @@ PROGRAMMER = arduino
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude -Iinclude/freeRTOS_library/include -Iinclude/freeRTOS_library/portable/GCC/ATMega323
+CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude -Iinclude/freeRTOS_library/include -Iinclude/freeRTOS_library/portable/GCC/ATMega323 -Isrc/drivers
 LDFLAGS = -mmcu=$(MCU)
 
 PORT = /dev/ttyUSB0
 BAUD = 115200
 
-SRCS = src/main.c include/freeRTOS_library/portable/MemMang/heap_1.c
+SRCS = src/main.c src/drivers/uart.c include/freeRTOS_library/portable/MemMang/heap_1.c
 SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c 
 SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
 OBJ = $(SRCS:.c=.o) 
@@ -51,6 +51,9 @@ uart:
 
 uart_kill:
 	sudo screen -S uart_monitor -X quit
+
+loadDevice:
+	./utility_scripts/wsl_connection_script.sh
 
 clean:
 	rm -rf *.out *.hex *.o src/*.o src/drivers/*.o include/freeRTOS_library/*.o include/freeRTOS_library/portable/GCC/ATMega323/*.o include/freeRTOS_library/portable/MemMang/*.o
