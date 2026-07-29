@@ -2,14 +2,12 @@
 #include <FreeRTOS.h>
 #include <freeRTOS_library/include/task.h>
 #include "uart.h"
+#include "lcd.h"
 
 // #undef DDRB
 // #define DDRB *((volatile unsigned char*)0x24)   // Data Direction Register for port B. Refer to data sheet for the address
 // #undef PORTB
 // #define PORTB *((volatile unsigned char*)0x25)  // Output register for port B. Refer to data sheet for the address
-
-// set port 9 to be output (the relay) and port 12 to be input (the button)
-#define motor_setup 0b00000010
 
 void Port13_Blink(int pinB){
     // flash the led using delay function
@@ -18,8 +16,6 @@ void Port13_Blink(int pinB){
 
     PORTB &= ~(0x1 << pinB);
     // delay_ms(500);
-
-    return;
 }
 
 void BlinkLedPin13Task(){
@@ -37,8 +33,6 @@ void BlinkLedPin13Task(){
 
         vTaskDelayUntil(&LastTime, BlinkPeriod);
     }
-
-    return;
 }
 
 //@brief flashes led in an alternating fashion
@@ -83,6 +77,7 @@ void led_array(){
 
 void Motor_circuit_logic(){
     // following code is for a dc motor
+    // when the button is pressed it will trigger the relay and allow the led light and dc motor to spin
     for (;;){
         taskENTER_CRITICAL();
         int currentButtonState = (int)(PINB & (1 << PINB4));
@@ -99,22 +94,16 @@ void Motor_circuit_logic(){
         }
         vTaskDelay(pdMS_TO_TICKS(50));
     }
-
-    return;
 }
 
 void Init_Blink(){
     // Set the data direction of port B bit 5 (pin 13) as output
     DDRB |= (0x1 << DDB5);
-    return;
 }
 
 void Init_Motor(){
-    // when the button is pressed it will trigger the relay and allow the led light and dc motor to spin
-    // DDRB |= (1 << DDB1); // Relay output
-    // DDRB &= ~(1 << DDB4); // Button input
-    DDRB |= motor_setup;
-    return;
+    DDRB |= (1 << DDB1); // Relay output (Port 9)
+    DDRB &= ~(1 << DDB4); // Button input (Port 12)
 }
 
 
@@ -130,13 +119,18 @@ int main(void){
 
     // enable uart protocol to receive and transmit data
     UART_init(MYUBRR);
-    Init_Blink();
-    Init_Motor();
+    twi_init();
+    LCD_begin(16, 2);
+    backlight();
+    cursor();
+    setCursor(0, 0);
+    blink();
+    lcd_print("hello world");
+    // Init_Blink();
+    // Init_Motor();
 
-    xTaskCreate(BlinkLedPin13Task, "Led_blink", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-    xTaskCreate(Motor_circuit_logic, "Motor_circuit", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
-
-    vTaskStartScheduler();
+    // xTaskCreate(BlinkLedPin13Task, "Led_blink", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+    // xTaskCreate(Motor_circuit_logic, "Motor_circuit", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 
     while(1){
         // infinite loop
