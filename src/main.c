@@ -3,6 +3,8 @@
 #include <freeRTOS_library/include/task.h>
 #include "uart.h"
 #include "lcd.h"
+#include "dht.h"
+#include "stdio.h"
 
 // #undef DDRB
 // #define DDRB *((volatile unsigned char*)0x24)   // Data Direction Register for port B. Refer to data sheet for the address
@@ -106,6 +108,13 @@ void Init_Motor(){
     DDRB &= ~(1 << DDB4); // Button input (Port 12)
 }
 
+void set_temp_cursor(){
+    lcd_setCursor(3, 0);
+}
+
+void set_humidity_cursor(){
+    lcd_setCursor(3, 1);
+}
 
 int main(void){
     // maybe needed to set to 16mhz
@@ -121,19 +130,40 @@ int main(void){
     UART_init(MYUBRR);
     twi_init();
     LCD_begin(16, 2);
-    backlight();
-    cursor();
-    setCursor(0, 0);
-    blink();
-    lcd_print("hello world");
+    lcd_backlight();
+    lcd_setCursor(0, 0);
+    lcd_print("T: ");
+    lcd_setCursor(0, 1);
+    lcd_print("H: ");
     // Init_Blink();
     // Init_Motor();
+    DHT sensor;
 
     // xTaskCreate(BlinkLedPin13Task, "Led_blink", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
     // xTaskCreate(Motor_circuit_logic, "Motor_circuit", configMINIMAL_STACK_SIZE, NULL, 2, NULL);
 
     while(1){
         // infinite loop
+        dht_read(&sensor);
+        if (sensor.status){
+            // UART_Transmit_string("data was successfully retrieved\n");
+            uint8_t degree_f = ((sensor.temp * 9) / 5) + 32;
+            char str[32];
+            sprintf(str, "%d C / %d F", sensor.temp, degree_f);
+            set_temp_cursor();
+            lcd_print(str);
+            set_humidity_cursor();
+            sprintf(str, "%d%%", sensor.humidity);
+            lcd_print(str);
+
+            // sprintf(str, "The temp is: %dC / %dF and the humidity is %d%%\n", sensor.temp, degree_f, sensor.humidity);
+            // UART_Transmit_string(str);
+        } else {
+            lcd_clear();
+            lcd_print("error");
+        }
+
+        _delay_ms(2000);
     }
 
 

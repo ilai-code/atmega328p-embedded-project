@@ -26,7 +26,7 @@ LDFLAGS = -mmcu=$(MCU)
 PORT = /dev/ttyUSB0
 BAUD = 115200
 
-SRCS = src/main.c src/drivers/uart.c src/drivers/lcd.c src/drivers/twi_functions.c include/freeRTOS_library/portable/MemMang/heap_1.c
+SRCS = src/main.c src/drivers/uart.c src/drivers/lcd.c src/drivers/twi_functions.c src/drivers/dht.c include/freeRTOS_library/portable/MemMang/heap_1.c
 SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c 
 SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
 OBJ = $(SRCS:.c=.o) 

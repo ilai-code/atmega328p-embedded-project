@@ -13,6 +13,8 @@ void UART_Transmit_string(const char *str);
 
 void UART_Transmit_ulong(unsigned long data);
 
+void UART_Transmit_float(float data);
+
 unsigned char UART_Receive(void);
 
 

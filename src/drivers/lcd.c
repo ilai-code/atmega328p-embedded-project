@@ -39,57 +39,57 @@ void expanderWrite(uint8_t data){
     twi_send(LCD_I2C_ADDR, &data, 1);
 }
 
-void display(){
+void lcd_display(){
     lcd.displaycontrol |= LCD_DISPLAYON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void noDisplay(){
+void lcd_noDisplay(){
     lcd.displaycontrol &= ~LCD_DISPLAYON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void clear(){
+void lcd_clear(){
     lcd_command(LCD_CLEARDISPLAY);
     _delay_us(2000);
 }
 
-void home(){
+void lcd_home(){
     lcd_command(LCD_RETURNHOME);
     _delay_us(2000);
 }
 
-void backlight(){
+void lcd_backlight(){
     lcd.backlight = LCD_BACKLIGHT;
     expanderWrite(0);
 }
 
-void noBacklight(){
+void lcd_noBacklight(){
     lcd.backlight = LCD_NOBACKLIGHT;
     expanderWrite(0);
 }
 
-void blink(){
+void lcd_blink(){
     lcd.displaycontrol |= LCD_BLINKON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void noBlink(){
+void lcd_noBlink(){
     lcd.displaycontrol &= ~LCD_BLINKON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void cursor(){
+void lcd_cursor(){
     lcd.displaycontrol |= LCD_CURSORON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void noCursor(){
+void lcd_noCursor(){
     lcd.displaycontrol &= ~LCD_CURSORON;
     lcd_command(LCD_DISPLAYCONTROL | lcd.displaycontrol);
 }
 
-void setCursor(uint8_t col, uint8_t row){
+void lcd_setCursor(uint8_t col, uint8_t row){
     int row_offsets[] = { 0x00, 0x40, 0x14, 0x54 };
     if (row >= 4){
         row -= 1;
@@ -123,17 +123,17 @@ void LCD_begin(uint8_t cols, uint8_t rows){
 
     // turn the display on with no cursor or blinking default
     lcd.displaycontrol = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
-    display();
+    lcd_display();
 
     // clear the screen
-    clear();
+    lcd_clear();
 
     lcd.displaymode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT;
 
     // set the entry mode
     lcd_command(LCD_ENTRYMODESET | lcd.displaymode);
 
-    home();
+    lcd_home();
 
 }
 
@@ -141,11 +141,11 @@ void lcd_print(const char* str){
     uint8_t count = 0;
     while (*str){
         if (count == lcd.cols){
-            setCursor(0, 1);
+            lcd_setCursor(0, 1);
         }
         else if (count == (lcd.cols * lcd.rows)){
-            clear();
-            setCursor(0, 0);
+            lcd_clear();
+            lcd_setCursor(0, 0);
             count = 0;
         }
         lcd_send(*str++, RS);

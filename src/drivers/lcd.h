@@ -66,17 +66,17 @@ typedef struct {
 } LCD;
 
 void LCD_begin(uint8_t cols, uint8_t rows);
-void setCursor(uint8_t col, uint8_t row);
-void cursor();
-void noCursor();
-void display();
-void noDisplay();
-void backlight();
-void noBacklight();
-void blink();
-void noBlink();
-void home();
-void clear();
+void lcd_setCursor(uint8_t col, uint8_t row);
+void lcd_cursor();
+void lcd_noCursor();
+void lcd_display();
+void lcd_noDisplay();
+void lcd_backlight();
+void lcd_noBacklight();
+void lcd_blink();
+void lcd_noBlink();
+void lcd_home();
+void lcd_clear();
 void lcd_print(const char* str);
 
 

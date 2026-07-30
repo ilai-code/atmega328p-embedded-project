@@ -1,5 +1,6 @@
 #include "uart.h"
-#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
 
 void UART_init(unsigned int ubrr){
     // set the baud rate
@@ -24,16 +25,21 @@ void UART_Transmit_string(const char *str){
     while (*str){
         UART_Transmit(*str++);
     }
-    // UART_Transmit('\n');
 }
 
 void UART_Transmit_ulong(unsigned long data){
     char buf[11];
-    ultoa(data, buf, 10);
-    for (char *p = buf; *p; p++){
-        UART_Transmit(*p);
-    }
-    UART_Transmit('\n');
+    sprintf(buf, "%lu", data);
+    UART_Transmit_string(buf);
+}
+
+void UART_Transmit_float(float data){
+    char buf[11];
+    snprintf(buf, sizeof(buf), "%f", data);
+    UART_Transmit_string(buf);
+    // if (newline){
+    //     UART_Transmit("\n");
+    // }
 }
 
 unsigned char UART_Receive(void){
