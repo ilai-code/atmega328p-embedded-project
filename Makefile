@@ -31,6 +31,8 @@ SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c
 SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
 OBJ = $(SRCS:.c=.o) 
 
+.PHONY: clean flash uart uart_kill loadDevice
+
 all: main.hex
 
 %.o: %.c
