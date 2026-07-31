@@ -15,7 +15,6 @@ void UART_init(unsigned int ubrr){
 
 void UART_Transmit(char data){
     // wait till buffer is empty
-    // ATOMIC_BLOCK(ATOMIC_RESTORESTATE){
     while (!(UCSR0A & (1 << UDRE0)));
     // write the data into buffer
     UDR0 = data;
@@ -37,9 +36,6 @@ void UART_Transmit_float(float data){
     char buf[11];
     snprintf(buf, sizeof(buf), "%f", data);
     UART_Transmit_string(buf);
-    // if (newline){
-    //     UART_Transmit("\n");
-    // }
 }
 
 unsigned char UART_Receive(void){

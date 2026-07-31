@@ -20,7 +20,9 @@ PROGRAMMER = arduino
 
 CC = avr-gcc
 OBJCOPY = avr-objcopy
-CFLAGS = -Wall -Os -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude -Iinclude/freeRTOS_library/include -Iinclude/freeRTOS_library/portable/GCC/ATMega323 -Isrc/drivers
+CFLAGS = -Wall -Os -MMD -MP -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude \
+		 -Iinclude/freeRTOS_library/include -Iinclude/freeRTOS_library/portable/GCC/ATMega323 \
+		 -Isrc/drivers 
 LDFLAGS = -mmcu=$(MCU)
 
 PORT = /dev/ttyUSB0
@@ -29,7 +31,8 @@ BAUD = 115200
 SRCS = src/main.c src/drivers/uart.c src/drivers/lcd.c src/drivers/twi_functions.c src/drivers/dht.c include/freeRTOS_library/portable/MemMang/heap_1.c
 SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c 
 SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
-OBJ = $(SRCS:.c=.o) 
+OBJ = $(SRCS:.c=.o)
+DEP = $(SRCS:.c=.d)
 
 .PHONY: clean flash uart uart_kill loadDevice
 
@@ -43,6 +46,8 @@ main.out: $(OBJ)
 
 main.hex: main.out
 	$(OBJCOPY) -O ihex -j .text -j .data main.out main.hex
+
+-include $(DEP)
 
 flash:
 	sudo avrdude -c $(PROGRAMMER) -p m328p -P $(PORT) -b $(BAUD) -D -U flash:w:main.hex:i
@@ -58,4 +63,4 @@ loadDevice:
 	./utility_scripts/wsl_connection_script.sh
 
 clean:
-	rm -rf *.out *.hex *.o src/*.o src/drivers/*.o include/freeRTOS_library/*.o include/freeRTOS_library/portable/GCC/ATMega323/*.o include/freeRTOS_library/portable/MemMang/*.o
+	rm -rf *.out *.hex $(OBJ) $(DEP)

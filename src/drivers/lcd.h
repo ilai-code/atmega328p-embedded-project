@@ -79,6 +79,4 @@ void lcd_home();
 void lcd_clear();
 void lcd_print(const char* str);
 
-
-
 #endif
