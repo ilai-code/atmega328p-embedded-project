@@ -25,15 +25,19 @@ CFLAGS = -Wall -Os -MMD -MP -mmcu=$(MCU) -DF_CPU=$(F_CPU) -Iinclude \
 		 -Isrc/drivers 
 LDFLAGS = -mmcu=$(MCU)
 
+# the port that your microcontroller is connected to
 PORT = /dev/ttyUSB0
+# the baud rate needed to flash the microcontroller
 BAUD = 115200
 
 SRCS = src/main.c src/drivers/uart.c src/drivers/lcd.c src/drivers/twi_functions.c src/drivers/dht.c include/freeRTOS_library/portable/MemMang/heap_1.c
 SRCS += include/freeRTOS_library/tasks.c include/freeRTOS_library/queue.c 
 SRCS += include/freeRTOS_library/list.c include/freeRTOS_library/portable/GCC/ATMega323/port.c
-OBJ = $(SRCS:.c=.o)
-DEP = $(SRCS:.c=.d)
+OBJS = $(SRCS:.c=.o)
+# using the object files makes it more useable in the event more than 1 programming language is used the .d files will still appear correctly
+DEPS = $(OBJS:.o=.d)
 
+#use PHONY to tell make that these are not files but commands/actions
 .PHONY: clean flash uart uart_kill loadDevice
 
 all: main.hex
@@ -41,13 +45,13 @@ all: main.hex
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-main.out: $(OBJ)
-	$(CC) $(LDFLAGS) -o main.out $(OBJ)
+main.out: $(OBJS)
+	$(CC) $(LDFLAGS) -o main.out $(OBJS)
 
 main.hex: main.out
 	$(OBJCOPY) -O ihex -j .text -j .data main.out main.hex
 
--include $(DEP)
+-include $(DEPS)
 
 flash:
 	sudo avrdude -c $(PROGRAMMER) -p m328p -P $(PORT) -b $(BAUD) -D -U flash:w:main.hex:i
@@ -63,4 +67,4 @@ loadDevice:
 	./utility_scripts/wsl_connection_script.sh
 
 clean:
-	rm -rf *.out *.hex $(OBJ) $(DEP)
+	rm -rf *.out *.hex $(OBJS) $(DEPS)
